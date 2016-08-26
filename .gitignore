@@ -1,0 +1,5 @@
+dist/*
+gadget_kb_emulator.egg-info/*
+*.pyc
+build/*
+src/test_files/_test_path
