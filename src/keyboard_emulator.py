@@ -84,6 +84,26 @@ class KeyboardEmulator(object):
         self.modifier = b"\x00" # On default don't use modifier key
         self.line_number = 0 # Line number we are parsing from filepath
 
+    def send_keystrokes(self, lines):
+        '''
+        Send argument as keystrokes.
+
+        Args:
+            lines: String containing keystrokes to send. The string needs to have
+                  special syntax which is explained in send_keystrokes_from_file
+                  comments.
+        '''
+
+        self.delay_between_keys = 0
+        self.modifier = b"\x00"
+        self.filepath = "arg"
+
+        lines = lines.split("\n")
+        self.line_number = 1
+        for line in lines:
+            self.parse_line(line)
+            self.line_number += 1
+
     def send_keystrokes_from_file(self, filepath):
         '''
         Send keystrokes from a file to USB.
@@ -109,7 +129,7 @@ class KeyboardEmulator(object):
             # Newlines are ignored
 
             # Everything else outside of "" and <> will raise an error
-            this text will raise an error 
+            this text will raise an error
             # Mix everything, but have a separate line for 'DELAY='
             DELAY=0.2
             <F2> "Hello world!" <ENTER> <SHIFT_L> "uppercase" <SHIFT_L>
@@ -140,7 +160,7 @@ class KeyboardEmulator(object):
             try:
                 self.delay_between_keys = float(line.split('=')[1].strip())
             except ValueError:
-                raise FileError(self.filepath, self.line_number,
+                raise LineSyntaxError(self.filepath, self.line_number,
                             "'" + line[6:].strip() + "' not a number")
 
         else:
@@ -167,7 +187,7 @@ class KeyboardEmulator(object):
 
                 # If key is anything else raise error
                 else:
-                    raise FileError(self.filepath, self.line_number,
+                    raise LineSyntaxError(self.filepath, self.line_number,
                                 "Found '" + key + "' outside of <> and \"\"")
 
                 i += 1
@@ -192,7 +212,7 @@ class KeyboardEmulator(object):
                 special += line[i]
                 i += 1
         except IndexError:
-            raise FileError(self.filepath, self.line_number,
+            raise LineSyntaxError(self.filepath, self.line_number,
                                 "Didn't find closing '>'")
 
         # If the special key is a modifier, toggle it
@@ -235,7 +255,7 @@ class KeyboardEmulator(object):
                 i += 1
 
         except IndexError:
-            raise FileError(self.filepath, self.line_number,
+            raise LineSyntaxError(self.filepath, self.line_number,
                                 "Didn't find closing \"")
 
         return i
@@ -340,19 +360,25 @@ class TranslateError(Exception):
         self.msg = msg
 
     def __str__(self):
-        return ("Error in file " + os.path.abspath(self._file) +
-            " on line " + str(self.line) + ": " + self.msg)
+        if self._file != "arg":
+            return ("Error in file " + os.path.abspath(self._file) +
+                " on line " + str(self.line) + ": " + self.msg)
+        else:
+            return ("Error in send_keystrokes() argument: "  + self.msg)
 
-class FileError(Exception):
+class LineSyntaxError(Exception):
     '''
     Error caused by text file syntax error
     '''
     def __init__(self, _file, line, msg):
-        super(FileError, self).__init__()
+        super(LineSyntaxError, self).__init__()
         self._file = _file
         self.line = line
         self.msg = msg
 
     def __str__(self):
-        return ("Error in file " + os.path.abspath(self._file) +
-            " on line " + str(self.line) + ": " + self.msg)
+        if self._file != "arg":
+            return ("Error in file " + os.path.abspath(self._file) +
+                " on line " + str(self.line) + ": " + self.msg)
+        else:
+            return ("Error in send_keystrokes() argument: "  + self.msg)
