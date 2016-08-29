@@ -36,19 +36,19 @@ class TestKeyboardEmulator(unittest.TestCase):
             self.kb_emulator.send_keystrokes_from_file("broken_special")
 
     def test_broken_special2(self):
-        with self.assertRaises(emulator.FileError):
+        with self.assertRaises(emulator.LineSyntaxError):
             self.kb_emulator.send_keystrokes_from_file("broken_special2")
 
     def test_broken_delay(self):
-        with self.assertRaises(emulator.FileError):
+        with self.assertRaises(emulator.LineSyntaxError):
             self.kb_emulator.send_keystrokes_from_file("broken_delay")
 
     def test_broken_text(self):
-        with self.assertRaises(emulator.FileError):
+        with self.assertRaises(emulator.LineSyntaxError):
             self.kb_emulator.send_keystrokes_from_file("broken_text")
 
     def test_broken_text2(self):
-        with self.assertRaises(emulator.FileError):
+        with self.assertRaises(emulator.LineSyntaxError):
             self.kb_emulator.send_keystrokes_from_file("broken_text2")
 
     def test_text(self):
