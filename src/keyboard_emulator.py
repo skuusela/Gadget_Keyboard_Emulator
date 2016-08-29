@@ -91,7 +91,12 @@ class KeyboardEmulator(object):
         Args:
             lines: String containing keystrokes to send. The string needs to have
                   special syntax which is explained in send_keystrokes_from_file
-                  comments.
+                  comments. If multiple lines are needed, \n can be used.
+
+                  Example:
+
+                    send_keystrokes("DELAY=0.1 \n \"Hello world\" \n <ENTER>")
+
         '''
 
         self.delay_between_keys = 0
