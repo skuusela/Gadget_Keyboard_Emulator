@@ -15,6 +15,8 @@
 from time import sleep
 import os.path
 
+from aft.logger import Logger as logger
+
 class KeyboardEmulator(object):
     '''
     Keyboard emulator class which has methods for sending key strokes through
@@ -81,8 +83,9 @@ class KeyboardEmulator(object):
         self.write_mode = write_mode # Change send_key() file write mode
         self.filepath = "" # Initialize filepath for send_keystrokes_from_file()
         self.delay_between_keys = 0 # Delay (seconds) between keystrokes
-        self.modifier = b"\x00" # On default don't use modifier key
+        self.modifier = 0 # On default don't use modifier key
         self.line_number = 0 # Line number we are parsing from filepath
+        logger.init_process()
 
     def send_keystrokes(self, lines):
         '''
@@ -100,7 +103,7 @@ class KeyboardEmulator(object):
         '''
 
         self.delay_between_keys = 0
-        self.modifier = b"\x00"
+        self.modifier = 0
         self.filepath = "arg"
 
         lines = lines.split("\n")
@@ -142,7 +145,7 @@ class KeyboardEmulator(object):
         '''
 
         self.delay_between_keys = 0
-        self.modifier = b"\x00"
+        self.modifier = 0
         self.filepath = filepath
 
         with open(filepath, "r") as f:
@@ -223,13 +226,13 @@ class KeyboardEmulator(object):
         # If the special key is a modifier, toggle it
         if special in self.modifier_codes:
             if self.modifier_codes[special] == self.modifier:
-                self.modifier = b"\x00"
+                self.modifier = 0
             else:
                 self.modifier = self.modifier_codes[special]
 
         # If special key is a normal key, send it
         else:
-            self.send_a_key(special, self.modifier)
+            self.send_a_key(special)
             sleep(self.delay_between_keys)
 
         return i
@@ -282,7 +285,7 @@ class KeyboardEmulator(object):
             timeout: how long sending a key will be tried until quitting [s]
         '''
         usb_message = bytearray(self.empty) # Initialize usb message
-        key, _modifier = self.key_to_hex(key) # Translate key to hex code
+        hex_key, _modifier = self.key_to_hex(key) # Translate key to hex code
 
         # Override self.modifier if the key needs a specific one
         if _modifier:
@@ -290,7 +293,7 @@ class KeyboardEmulator(object):
         else:
             modifier = self.modifier
 
-        usb_message[2] = key
+        usb_message[2] = hex_key
         usb_message[0] = modifier
 
         time = 0
@@ -301,14 +304,19 @@ class KeyboardEmulator(object):
                     emulator.write(self.empty) # Stop the key being pressed
 
             except IOError:
-                print("Can't connect")
+                logger.warning("Couldn't connect to host", "kb_emulator.log")
                 time += 1
                 sleep(1)
 
             else:
+                logger.info("Sent key: " + key + "  hex code: " +
+                            format(hex_key, '#04x') + "  modifier: " +
+                            format(modifier, '#04x'), "kb_emulator.log")
                 return 0
 
-        raise TimeoutError("Keyboard emulator couldn't connect to host")
+        msg = "Keyboard emulator couldn't connect to host"
+        logger.error(msg, "kb_emulator.log")
+        raise TimeoutError(msg)
 
     def key_to_hex(self, key):
         """
