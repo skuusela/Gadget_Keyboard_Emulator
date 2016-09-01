@@ -3,3 +3,5 @@ gadget_kb_emulator.egg-info/*
 *.pyc
 build/*
 src/test_files/_test_path
+src/send_keystrokes.py
+src/test_files/kb_emulator.log
