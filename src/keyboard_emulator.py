@@ -309,7 +309,7 @@ class KeyboardEmulator(object):
                 sleep(1)
 
             else:
-                logger.info("Sent key: " + key + "  hex code: " +
+                logger.info("Sent key: " + key.ljust(5) + "  hex code: " +
                             format(hex_key, '#04x') + "  modifier: " +
                             format(modifier, '#04x'), "kb_emulator.log")
                 return 0
