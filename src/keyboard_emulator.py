@@ -284,7 +284,7 @@ class KeyboardEmulator(object):
             key: A key to send, for example: "a", "z", "3", "F2", "ENTER"
             timeout: how long sending a key will be tried until quitting [s]
         '''
-        usb_message = bytearray(self.empty) # Initialize usb message
+        usb_message = bytearray(self.empty.encode()) # Initialize usb message
         hex_key, _modifier = self.key_to_hex(key) # Translate key to hex code
 
         # Override self.modifier if the key needs a specific one
@@ -300,7 +300,7 @@ class KeyboardEmulator(object):
         while time < timeout:
             try:
                 with open(self.emulator, self.write_mode) as emulator:
-                    emulator.write(usb_message) # Send the key
+                    emulator.write(usb_message.decode()) # Send the key
                     emulator.write(self.empty) # Stop the key being pressed
 
             except IOError:
