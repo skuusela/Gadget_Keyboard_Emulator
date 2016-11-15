@@ -85,7 +85,7 @@ class KeyboardEmulator(object):
         self.delay_between_keys = 0 # Delay (seconds) between keystrokes
         self.modifier = 0 # On default don't use modifier key
         self.line_number = 0 # Line number we are parsing from filepath
-        logger.init_process()
+        logger.set_process_prefix()
 
     def send_keystrokes(self, lines):
         '''
